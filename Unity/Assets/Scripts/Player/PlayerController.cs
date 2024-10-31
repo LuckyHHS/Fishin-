@@ -21,13 +21,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask GroundLayer;
 
     [Header("Movement & Cameras")]
-    [SerializeField] private float MovementSpeed = 27.5f;
-    [SerializeField] private float MaxMovementVelocity = 27.5f;
-    [SerializeField] private float JumpForce = 5f;
+    [SerializeField] private float MovementSpeed = 7f;
+    [SerializeField] private float GroundDrag = 10f;
+    [SerializeField] private float JumpForce = 300f;
     [SerializeField] private float CameraSensitivity = 1.5f;
 
     [Header("Camera Settings")]
-    [SerializeField] private float SlopeMultiplier = 1.1f;
+    [SerializeField] private float SlopeMultiplier = 1.05f;
     public bool canUse {get; set;} = true;
 
 
@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     private RaycastHit SlopeHit;
     private Vector3 SlopeMoveDirection;
     private Vector3 MoveDirection;
+    private bool grounded;
 
 
     void Awake()
@@ -72,6 +73,20 @@ public class PlayerController : MonoBehaviour
         // Check if we can use it.
         if (canUse)
         {
+            // Check if grounded.
+            grounded = IsGrounded();
+
+            // Set grounded.
+            if (grounded)
+            {
+                rigidbody.drag = GroundDrag;
+            }
+            else
+            {
+                rigidbody.drag = 0;
+            }
+
+            // Call main method.
             HandleMovement(); 
         }
     }
@@ -121,21 +136,29 @@ public class PlayerController : MonoBehaviour
         MoveDirection = ((Orientation.transform.forward * Vertical + Orientation.transform.right * Horizontal).normalized) * movementForce * (OnSlope() ? SlopeMultiplier : 1f);
         SlopeMoveDirection = Vector3.ProjectOnPlane(MoveDirection, SlopeHit.normal);
 
-        // Max force
-        float maxForce = (Mathf.Max(0.0f, MaxMovementVelocity - rigidbody.velocity.magnitude) * rigidbody.mass) / Time.fixedDeltaTime;
-   
-        // Apply the force if we are on slope.
-        if (OnSlope())
+        // Check if we are grounded.
+        if (grounded)
         {
-            rigidbody.AddForce(Mathf.Min(maxForce, movementForce) * SlopeMoveDirection, ForceMode.Force);
-        }
-        else
-        {
-            rigidbody.AddForce(Mathf.Min(maxForce, movementForce) * MoveDirection, ForceMode.Force);
+            // Apply the force if we are on slope.
+            if (OnSlope())
+            {
+                rigidbody.AddForce(movementForce * SlopeMoveDirection, ForceMode.Force);
+            }
+            else
+            {
+                rigidbody.AddForce(movementForce * MoveDirection, ForceMode.Force);
+            }
         }
 
-        // Using gravity.
-        rigidbody.useGravity = !OnSlope();
+        // Get flat vel.
+        Vector3 flatVel = new Vector3(rigidbody.velocity.x, 0f, rigidbody.velocity.z);
+
+        // Limit velocity.
+        if (flatVel.magnitude > MovementSpeed)
+        {
+            Vector3 limitedVelocity = flatVel.normalized * MovementSpeed;
+            rigidbody.velocity = new Vector3(limitedVelocity.x, rigidbody.velocity.y, limitedVelocity.z);
+        }
     }
 
 
