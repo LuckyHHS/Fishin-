@@ -1,15 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     //* THIS SCRIPT CONTROLS THE PLAYER MOVEMENT AND LOOKING
 
-    public static PlayerController instance {get; private set;}
     // PUBLICS
     [Header("Objects")]
     public GameObject CameraHolder;
@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject SlopeCheck;
     [SerializeField] private GameObject GroundCheck;
     [SerializeField] private LayerMask GroundLayer;
+    [SerializeField] private PlayerLoader PlayerLoader;
 
     [Header("Movement & Cameras")]
     [SerializeField] private float MovementSpeed = 7f;
@@ -41,35 +42,33 @@ public class PlayerController : MonoBehaviour
     private bool grounded;
 
 
-    void Awake()
-    {
-        // Create singleton
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            instance = this;
-        }
-    }
 
     // Start is called before the first frame update
+    [Client]
     void Start()
     {
+        if (!isLocalPlayer) return;
+
+        // Load player objects.
+        PlayerLoader.PlayerLoaded();
+        
         // Set up the rigidbody and remove the cursor.
         rigidbody = GetComponent<Rigidbody>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         // Jumping
-        InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded()) {rigidbody.AddForce(Vector3.up * JumpForce);}};
+        InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() && isLocalPlayer) {rigidbody.AddForce(Vector3.up * JumpForce);}};
     }
 
 
     // Update is called once per frame for physics.
+    [Client]
     void FixedUpdate()
     {
+        // Check user
+        if (!isLocalPlayer) return;
+
         // Check if we can use it.
         if (canUse)
         {
@@ -91,8 +90,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    [Client]
     void LateUpdate()
     {
+        // Check user
+        if (!isLocalPlayer) return;
+
         // Check if we can use it.
         if (canUse)
         {
