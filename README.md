@@ -1,7 +1,8 @@
 # Fishin'
 An open source 2D fishing game made in Unity URP. Licensed under CC-BY-NC 4.0.
 
-![Screenshot 2024-10-30 201731](https://github.com/user-attachments/assets/191c6826-a8bd-4163-90aa-3cd8f32f5550)
+![image](https://github.com/user-attachments/assets/24925323-96d8-4b59-bf97-3bd48d85f168)
+
 
 
 <br>
