@@ -18,14 +18,25 @@ public class CustomNetworkManager : NetworkManager
     [Header("Objects")]
     [SerializeField] private GameObject PlayerPrefab;
     [SerializeField] private Vector3[] SpawnPoints;
+    [SerializeField] private GameObject networkEvent;
+    public static CustomNetworkManager instance;
     
 
     // PRIVATES
     private bool sceneLoaded;
 
-    void Start()
+    void Awake()
     {
-        
+        // Set singleton
+        if (instance != null && instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(networkEvent);
+        }
     }
 
     // Called when the server is started - HOST
@@ -66,7 +77,7 @@ public class CustomNetworkManager : NetworkManager
 
         // Send the message to the server
         NetworkClient.Send(characterMessage);
-        Debug.Log("A new client has connected.");
+         Debug.Log("[CLIENT] : A new client has connected.");
     }
 
     // Wait for scene load.
@@ -100,15 +111,30 @@ public class CustomNetworkManager : NetworkManager
     {
         base.OnClientDisconnect();
 
-        Debug.Log("A client has disconnected.");
+        NetworkEvents.OnClientRemovedEvent.Invoke();
     }
 
     // Called when the server is stopped 
-    public override void OnStopServer()
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-        Debug.Log("Switched scenes because host left.");
-        // Load the main menu.
+        base.OnServerDisconnect(conn);
+        Debug.Log("[SERVER] : Server has stopped");
+
+        // Call that the host left on the server.
+        NetworkEvents.OnHostLeaveEvent.Invoke();
+    }
+
+    public void LeaveGame()
+    {
+        // Load main menu
         SceneManager.LoadScene("MainMenu");
+
+        // Show cursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Allow for hosting.
+        this.gameObject.GetComponent<SteamLobbies>().startedHosting = false;
     }
 }
 

@@ -69,6 +69,22 @@ public class PlayerController : NetworkBehaviour
         // Check user
         if (!isLocalPlayer) return;
 
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            if (isServer) 
+            {
+                Debug.Log("Stopping as host.");
+                CustomNetworkManager.instance.StopHost();
+                CustomNetworkManager.instance.LeaveGame();
+            }
+            else
+            {
+                Debug.Log("Stopping as client");
+                CustomNetworkManager.instance.StopClient();
+                CustomNetworkManager.instance.LeaveGame();
+            }
+        }
+
         // Check if we can use it.
         if (canUse)
         {

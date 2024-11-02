@@ -18,12 +18,14 @@ public class SteamLobbies : MonoBehaviour
 
     // Variables
     public ulong CurrentLobbyID;
+    public bool startedHosting = false;
     private const string HostAddressKey = "HostAddress";
     private CustomNetworkManager manager;
+    
 
     // Events
     public static Action CreateLobby;
-    private bool startedHosting = false;
+    
 
     void Start()
     {

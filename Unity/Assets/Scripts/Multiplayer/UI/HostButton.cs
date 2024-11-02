@@ -9,6 +9,6 @@ public class HostButton : MonoBehaviour
     public void StartHosting()
     {
         // Start host
-        SteamLobbies.CreateLobby();
+        SteamLobbies.CreateLobby.Invoke();
     }
 }
