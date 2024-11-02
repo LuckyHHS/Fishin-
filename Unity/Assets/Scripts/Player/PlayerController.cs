@@ -20,6 +20,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private GameObject GroundCheck;
     [SerializeField] private LayerMask GroundLayer;
     [SerializeField] private PlayerLoader PlayerLoader;
+    [SerializeField] private GameObject PlayerModel;
 
     [Header("Movement & Cameras")]
     [SerializeField] private float MovementSpeed = 7f;
@@ -136,6 +137,7 @@ public class PlayerController : NetworkBehaviour
         // Orientation object is set to the correct rotation, then the players rotation is set to it to prevent player model stuttering, but when setting the camera rotation it doesn't work.
         Orientation.transform.rotation = Quaternion.Euler(0, currentCameraRotation.y, 0);
         CameraHolder.transform.rotation = Quaternion.Euler(currentCameraRotation.x, currentCameraRotation.y, 0);
+        PlayerModel.transform.rotation = Quaternion.Euler(0, currentCameraRotation.y, 0);
     }
 
     /// <summary>

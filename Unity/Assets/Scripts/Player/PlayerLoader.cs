@@ -9,6 +9,7 @@ public class PlayerLoader : NetworkBehaviour
 
     [Header("Objects")]
     [SerializeField] private GameObject[] OnLoadObjects;
+    [SerializeField] private GameObject[] OnLoadHideObjects;
     
     public void PlayerLoaded()
     {
@@ -18,6 +19,11 @@ public class PlayerLoader : NetworkBehaviour
         foreach (GameObject obj in OnLoadObjects)
         {
             obj.SetActive(true);
+        }
+        // Hide some objects.
+        foreach (GameObject obj in OnLoadHideObjects)
+        {
+            obj.SetActive(false);
         }
     }
 }
