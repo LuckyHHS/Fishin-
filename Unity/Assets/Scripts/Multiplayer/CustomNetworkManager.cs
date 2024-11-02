@@ -18,9 +18,15 @@ public class CustomNetworkManager : NetworkManager
     [Header("Objects")]
     [SerializeField] private GameObject PlayerPrefab;
     [SerializeField] private Vector3[] SpawnPoints;
+    
 
     // PRIVATES
     private bool sceneLoaded;
+
+    void Start()
+    {
+        
+    }
 
     // Called when the server is started - HOST
     public override void OnStartServer()
