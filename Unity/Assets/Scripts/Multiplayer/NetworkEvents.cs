@@ -12,14 +12,27 @@ public class NetworkEvents : NetworkBehaviour
     // Publics
     public static Action OnHostLeaveEvent;
 
-    public static Action OnClientRemovedEvent;
+
+    public static NetworkEvents instance;
+
+    void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            instance = this;
+        }
+    }
 
     void Start()
     {
         // Listen for event.
         OnHostLeaveEvent += OnHostLeave;
      
-        OnClientRemovedEvent += OnClientRemoved;
+ 
 
         // Dont Destroy
         DontDestroyOnLoad(this);
@@ -29,8 +42,6 @@ public class NetworkEvents : NetworkBehaviour
     {
         if (isServer)
         {
-            Debug.Log("[SERVER] : Is server");
-
             // Call the RPC.
             RpcHostLeft();
         }   
@@ -48,14 +59,8 @@ public class NetworkEvents : NetworkBehaviour
         Debug.Log("[CLIENT] : Host has left.");
         // Show notification.
         Notification.showMessage.Invoke("The host has stopped hosting the server.");
-
-        // Load the main menu scene.
-        CustomNetworkManager.instance.LeaveGame();
     }
 
 
-    public void OnClientRemoved()
-    {
-        Debug.Log("[CLIENT] : A client has disconnected.");
-    }
+   
 }

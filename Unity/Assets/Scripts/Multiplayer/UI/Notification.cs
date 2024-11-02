@@ -25,6 +25,7 @@ public class Notification : MonoBehaviour
             instance = this;
         }
     }
+
     void Start()
     {
         // Listen for messages
@@ -38,6 +39,7 @@ public class Notification : MonoBehaviour
     {
         // Create the object and change the text of the object.
         GameObject notification = Instantiate(NotificationPrefab);
-        notification.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = message;
+        notification.GetComponent<NotificationCanvas>().text.text = message;
+        DontDestroyOnLoad(notification);
     }
 }

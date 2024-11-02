@@ -4,6 +4,8 @@ using UnityEngine;
 using Mirror;
 using UnityEngine.SceneManagement;
 using Steamworks;
+using System;
+using Random = UnityEngine.Random;
 
 public struct CreateCharacterMessage : NetworkMessage
 {
@@ -14,12 +16,19 @@ public class CustomNetworkManager : NetworkManager
 {
     //* This script handles players leaving and joining, and just events happening.
 
+    /*
+    CLIENT - Means that it is run ONLY on that persons computer
+    CLIETS - Means that it runs on all the clients in the game.
+    SERVER - Means that it is runs on the server
+    */
+
     // PUBLICS
     [Header("Objects")]
     [SerializeField] private GameObject PlayerPrefab;
     [SerializeField] private Vector3[] SpawnPoints;
     [SerializeField] private GameObject networkEvent;
     public static CustomNetworkManager instance;
+    public bool gracefulDisconnect = false;
     
 
     // PRIVATES
@@ -38,30 +47,20 @@ public class CustomNetworkManager : NetworkManager
             DontDestroyOnLoad(networkEvent);
         }
     }
+    
+    
+    // CONNECTIONS =================
 
-    // Called when the server is started - HOST
+
+
+    // Called when the server is started - SERVER
     public override void OnStartServer()
     {
         base.OnStartServer();
 
         // Server initialization.
         NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
-        Debug.Log("Server started");
-    }
-
-    // Called when a new player joins the server. - SERVER
-    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
-    {
-        base.OnServerAddPlayer(conn);
-
-        Debug.Log("Added player to the network");
-    }
-
-    // A function to create a new character.
-    void OnCreateCharacter(NetworkConnectionToClient conn, CreateCharacterMessage message)
-    {
-        // Wait for scene load.
-        StartCoroutine(WaitForSceneToLoad(conn, message));
+        Debug.Log("<color=#FF0000>[SERVER] : Server started</color>");
     }
 
     // Called when a new client connects. - CLIENT
@@ -77,21 +76,103 @@ public class CustomNetworkManager : NetworkManager
 
         // Send the message to the server
         NetworkClient.Send(characterMessage);
-         Debug.Log("[CLIENT] : A new client has connected.");
+        Debug.Log("<color=#00FF00>[CLIENT] : We have connected.</color>");
     }
 
-    // Wait for scene load.
-    private IEnumerator WaitForSceneToLoad(NetworkConnectionToClient conn, CreateCharacterMessage message)
+    // Called when you disconnect from the server - CLIENT
+    public override void OnClientDisconnect()
     {
-        // Wait until the specified scene is loaded
-        while (SceneManager.GetActiveScene().name != "World")
+        Debug.Log("<color=#00FF00>[CLIENT] : Sucessfully disconnected.</color>");
+        
+        // Check if meant to leave.
+        if (!gracefulDisconnect)
         {
-            // Wait for the next frame
-            yield return new WaitForEndOfFrame(); 
+            Notification.showMessage.Invoke("The host has stopped hosting the server.");
         }
 
-        // Scene is now loaded
-        Debug.Log("World scene is loaded!");
+        // Reset
+        gracefulDisconnect = false;
+
+        // Exit to main menu.
+        LeaveGame();
+        
+
+        // Disconnect.
+        base.OnClientDisconnect();
+    }
+    
+    // Called when a player leaves - SERVER.
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
+    {
+        base.OnServerDisconnect(conn);
+        Debug.Log("<color=#FF0000>[SERVER] : Player has left.</color>");
+    }
+
+    // Called when a player joins - SERVER.
+    public override void OnServerConnect(NetworkConnectionToClient conn)
+    {
+        base.OnServerConnect(conn);
+        Debug.Log("<color=#FF0000>[SERVER] : Player has joined.</color>");
+    }
+
+    // Called on the server when the server is stopped.
+    public override void OnStopServer()
+    {
+        Debug.Log("<color=#FF0000>[SERVER] : Server has been stopped.</color>");
+    }
+
+    // Called on the clients when an error happened - CLIENT
+    public override void OnClientError(TransportError error, string reason)
+    {
+        base.OnClientError(error, reason);
+        Debug.LogWarning("<color=#00FF00>[CLIENT ERROR] : " + error.ToString() + " - " + reason + "</color>");
+        String message = "Unable to connect to the server.";
+
+        // Listen for error cases.
+        switch (error)
+        {
+            case TransportError.DnsResolve:
+                Notification.showMessage.Invoke(message);
+                break;
+            case TransportError.Refused:
+                Notification.showMessage.Invoke(message);
+                break;
+            case TransportError.Timeout:
+                Notification.showMessage.Invoke("Connection timed out.");
+                break;
+            case TransportError.Congestion:
+                Notification.showMessage.Invoke(message);
+                break;
+            case TransportError.InvalidReceive:
+                Notification.showMessage.Invoke("Invalid packet recieved.");
+                break;
+            case TransportError.InvalidSend:
+                Notification.showMessage.Invoke("Invalid data sent.");
+                break;
+            case TransportError.ConnectionClosed:
+                Notification.showMessage.Invoke(message);
+                break;
+            case TransportError.Unexpected:
+                Notification.showMessage.Invoke("Unexpected error: " + reason);
+                break;
+            default:
+                Notification.showMessage.Invoke("Unknown error: " + reason);
+                break;
+        }
+    }
+
+    // Called on the client when transport errors happen _ CLIENT
+    public override void OnClientTransportException(Exception exception) { 
+        Notification.showMessage.Invoke("Transport Error: " + exception.Message);
+    }
+
+
+    // OTHER FUNCTIONS ================
+
+
+    // A function to create a new character.
+    void OnCreateCharacter(NetworkConnectionToClient conn, CreateCharacterMessage message)
+    {
 
         // Spawn player prefab.
         GameObject gameobject = Instantiate(PlayerPrefab, SpawnPoints[Random.Range(0, SpawnPoints.Length)], Quaternion.identity);
@@ -102,31 +183,12 @@ public class CustomNetworkManager : NetworkManager
 
         // Set this gameobject as the primary controller
         NetworkServer.AddPlayerForConnection(conn, gameobject);
-
-        Debug.Log("Created player character.");
     }
 
-    // Called when a client leaves - CLIENT
-    public override void OnClientDisconnect()
-    {
-        base.OnClientDisconnect();
-
-        NetworkEvents.OnClientRemovedEvent.Invoke();
-    }
-
-    // Called when the server is stopped 
-    public override void OnServerDisconnect(NetworkConnectionToClient conn)
-    {
-        base.OnServerDisconnect(conn);
-        Debug.Log("[SERVER] : Server has stopped");
-
-        // Call that the host left on the server.
-        NetworkEvents.OnHostLeaveEvent.Invoke();
-    }
-
+    // Leaves the game.
     public void LeaveGame()
     {
-        // Load main menu
+        // Load main menu.
         SceneManager.LoadScene("MainMenu");
 
         // Show cursor

@@ -49,7 +49,7 @@ public class SteamLobbies : MonoBehaviour
         // Check if we are already hosting.
         if (startedHosting) { return;}
         startedHosting = true;
-
+        
         // Create a new lobby.
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, manager.maxConnections);
     }
@@ -60,7 +60,7 @@ public class SteamLobbies : MonoBehaviour
         // Check if the lobby was created successfully.
         if (callback.m_eResult != EResult.k_EResultOK) { return;}
 
-        Debug.Log("Lobby created successfully.");
+        Debug.Log("<color=#FFFF00>[STEAM] : Lobby created successfully.</color>");
 
         // Start hosting.
         manager.StartHost();
@@ -72,7 +72,7 @@ public class SteamLobbies : MonoBehaviour
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
-        Debug.Log("Request to join a lobby.");
+        Debug.Log("<color=#FFFF00>[STEAM] : Request to join a lobby.</color>");
         // Join the lobby.
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }

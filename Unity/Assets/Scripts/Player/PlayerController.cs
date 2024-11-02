@@ -73,15 +73,15 @@ public class PlayerController : NetworkBehaviour
         {
             if (isServer) 
             {
-                Debug.Log("Stopping as host.");
-                CustomNetworkManager.instance.StopHost();
-                CustomNetworkManager.instance.LeaveGame();
+                Debug.Log("<color=#00FF00>[CLIENT] : Stopping as host.</color>");
+                CustomNetworkManager.instance.gracefulDisconnect  = true;
+                CustomNetworkManager.instance.StopHost();      
             }
             else
             {
-                Debug.Log("Stopping as client");
+                Debug.Log("<color=#00FF00>[CLIENT] : Stopping as client.</color>");
+                CustomNetworkManager.instance.gracefulDisconnect  = true;
                 CustomNetworkManager.instance.StopClient();
-                CustomNetworkManager.instance.LeaveGame();
             }
         }
 

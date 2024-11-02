@@ -203,7 +203,7 @@ MonoBehaviour:
   sendRate: 30
   offlineScene: 
   onlineScene: Assets/Scenes/World.unity
-  offlineSceneLoadDelay: 0
+  offlineSceneLoadDelay: 2
   transport: {fileID: 447692694}
   networkAddress: localhost
   maxConnections: 10
@@ -235,6 +235,7 @@ MonoBehaviour:
   SpawnPoints:
   - {x: -2.209, y: 0.511, z: -4.873}
   networkEvent: {fileID: 1919159914}
+  gracefulDisconnect: 0
 --- !u!4 &447692696
 Transform:
   m_ObjectHideFlags: 0
@@ -279,7 +280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a32996c959a24a45b4fcc175454897b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NotificationPrefab: {fileID: 342223132794435615, guid: b5388fa27932b994786d995bce57c2e0,
+  NotificationPrefab: {fileID: 772850754073468684, guid: b5388fa27932b994786d995bce57c2e0,
     type: 3}
 --- !u!4 &711495479
 Transform:
@@ -365,6 +366,6 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 711495479}
   - {fileID: 447692696}
   - {fileID: 1919159917}
+  - {fileID: 711495479}
