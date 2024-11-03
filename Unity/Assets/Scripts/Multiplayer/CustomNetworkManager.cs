@@ -26,7 +26,7 @@ public class CustomNetworkManager : NetworkManager
     [Header("Objects")]
     [SerializeField] private GameObject PlayerPrefab;
     [SerializeField] private Vector3[] SpawnPoints;
-    [SerializeField] private GameObject networkEvent;
+
     public static CustomNetworkManager instance;
     public bool gracefulDisconnect = false;
     
@@ -44,7 +44,7 @@ public class CustomNetworkManager : NetworkManager
         else
         {
             instance = this;
-            DontDestroyOnLoad(networkEvent);
+        
         }
     }
     
@@ -127,6 +127,7 @@ public class CustomNetworkManager : NetworkManager
         base.OnClientError(error, reason);
         Debug.LogWarning("<color=#00FF00>[CLIENT ERROR] : " + error.ToString() + " - " + reason + "</color>");
         String message = "Unable to connect to the server.";
+        SteamLobbies.instance.tryingJoin = false;
 
         // Listen for error cases.
         switch (error)
@@ -163,6 +164,7 @@ public class CustomNetworkManager : NetworkManager
 
     // Called on the client when transport errors happen _ CLIENT
     public override void OnClientTransportException(Exception exception) { 
+        SteamLobbies.instance.tryingJoin = false;
         Notification.showMessage.Invoke("Transport Error: " + exception.Message);
     }
 
@@ -188,15 +190,16 @@ public class CustomNetworkManager : NetworkManager
     // Leaves the game.
     public void LeaveGame()
     {
-        // Load main menu.
-        SceneManager.LoadScene("MainMenu");
-
+        // Allow for joining.
+        SteamLobbies.instance.tryingJoin = false;
+        
         // Show cursor
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         // Allow for hosting.
-        this.gameObject.GetComponent<SteamLobbies>().startedHosting = false;
+        SteamLobbies.instance.startedHosting = false;
+        SteamLobbies.instance.CurrentLobbyID = 0;
     }
 }
 

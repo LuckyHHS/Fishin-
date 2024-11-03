@@ -24,6 +24,7 @@ public class NetworkEvents : NetworkBehaviour
         else
         {
             instance = this;
+            DontDestroyOnLoad(this.gameObject);
         }
     }
 

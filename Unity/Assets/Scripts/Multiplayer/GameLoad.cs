@@ -13,7 +13,7 @@ public class GameLoad : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (CustomNetworkManager.instance == null && loadedHandlers == false)
+        if (loadedHandlers == false)
         {
             loadedHandlers = true;
             Debug.Log("Loaded handlers");
