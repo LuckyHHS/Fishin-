@@ -6,6 +6,7 @@ using Steamworks;
 using TMPro;
 using System;
 using UnityEngine.SceneManagement;
+using Edgegap;
 
 public class SteamLobbies : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class SteamLobbies : MonoBehaviour
     protected Callback<LobbyEnter_t> LobbyEntered;
     protected Callback<LobbyMatchList_t> LobbyList;
     protected Callback<LobbyDataUpdate_t> LobbyDataUpdated;
+    
 
     public List<CSteamID> serverIds = new();
 
@@ -32,6 +34,9 @@ public class SteamLobbies : MonoBehaviour
 
     // Events
     public static Action<int, String> CreateLobby;
+
+    // PERSISTING OBJECTS
+    public GameObject SwitchingSceneObject;
 
     void Awake()
     {
@@ -86,10 +91,6 @@ public class SteamLobbies : MonoBehaviour
         {
             // Create a new lobby.
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, CustomNetworkManager.instance.maxConnections);
-        } else if (type == 2)
-        {
-            // Create a new lobby.
-            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePrivate, CustomNetworkManager.instance.maxConnections);
         }
         
         
@@ -109,6 +110,7 @@ public class SteamLobbies : MonoBehaviour
     {
         // Check if the lobby was created successfully.
         if (callback.m_eResult != EResult.k_EResultOK) { 
+     
             // Set hosting object to false.
             LoadingScreenObject.SetActive(false); 
             startedHosting = false;
@@ -140,17 +142,21 @@ public class SteamLobbies : MonoBehaviour
     {
         Debug.Log("<color=#FFFF00>[STEAM] : Request to join a lobby.</color>");
 
-           // Set hosting object to true.
+        // Set hosting object to true.
         LoadingScreenObject.SetActive(true);
         LoadingScreenText.text = "Joining server...";
+        
         // Join the lobby.
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
     private void OnLobbyEntered(LobbyEnter_t callback)
     {
+            
         // Everyone
         CurrentLobbyID = callback.m_ulSteamIDLobby;
+
+         LoadingScreenObject.SetActive(false);
 
         // Check if is not client.
         if (NetworkServer.active)

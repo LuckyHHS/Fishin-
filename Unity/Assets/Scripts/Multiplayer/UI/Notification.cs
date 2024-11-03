@@ -37,6 +37,7 @@ public class Notification : MonoBehaviour
 
     public void OnShowMessage(string message)
     {
+        SteamLobbies.instance.LoadingScreenObject.SetActive(false);
         // Create the object and change the text of the object.
         GameObject notification = Instantiate(NotificationPrefab);
         notification.GetComponent<NotificationCanvas>().text.text = message;

@@ -26,6 +26,7 @@ public class CustomNetworkManager : NetworkManager
     [Header("Objects")]
     [SerializeField] private GameObject PlayerPrefab;
     [SerializeField] private Vector3[] SpawnPoints;
+    [SerializeField] private GameObject LoadingScreenPrefab;
 
     public static CustomNetworkManager instance;
     public bool gracefulDisconnect = false;
@@ -83,6 +84,7 @@ public class CustomNetworkManager : NetworkManager
     public override void OnClientDisconnect()
     {
         Debug.Log("<color=#00FF00>[CLIENT] : Sucessfully disconnected.</color>");
+
         
         // Check if meant to leave.
         if (!gracefulDisconnect)
@@ -128,6 +130,7 @@ public class CustomNetworkManager : NetworkManager
         Debug.LogWarning("<color=#00FF00>[CLIENT ERROR] : " + error.ToString() + " - " + reason + "</color>");
         String message = "Unable to connect to the server.";
         SteamLobbies.instance.tryingJoin = false;
+        SteamLobbies.instance.startedHosting = false;
 
         // Listen for error cases.
         switch (error)
@@ -190,6 +193,11 @@ public class CustomNetworkManager : NetworkManager
     // Leaves the game.
     public void LeaveGame()
     {
+        // Show a loading screen.
+        SteamLobbies.instance.SwitchingSceneObject = Instantiate(LoadingScreenPrefab);
+        SteamLobbies.instance.SwitchingSceneObject.GetComponent<Animator>().SetBool("Open", true);
+        DontDestroyOnLoad(SteamLobbies.instance.SwitchingSceneObject);
+
         // Allow for joining.
         SteamLobbies.instance.tryingJoin = false;
         
