@@ -102,6 +102,7 @@ public class ServerHandler : MonoBehaviour
 
      public void SortLobbiesByPlayerCount()
     {
+        
         // Check if has any servers.
         if (ServerContentList.transform.childCount == 0)
         {

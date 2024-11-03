@@ -59,7 +59,7 @@ public class PlayerController : NetworkBehaviour
         Cursor.visible = false;
 
         // Jumping
-        InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() && isLocalPlayer) {rigidbody.AddForce(Vector3.up * JumpForce);}};
+        InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() && isLocalPlayer) {UserData.data.Coins += 0.23f; CoinUIUpdate.updateCoin.Invoke(); rigidbody.AddForce(Vector3.up * JumpForce);}};
     }
 
 
@@ -201,6 +201,7 @@ public class PlayerController : NetworkBehaviour
 
     private bool IsGrounded()
     {
+       
         return Physics.CheckSphere(GroundCheck.transform.position, 0.15f, GroundLayer);
     }
 }

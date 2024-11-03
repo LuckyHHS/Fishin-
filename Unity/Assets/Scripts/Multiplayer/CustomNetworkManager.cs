@@ -48,6 +48,11 @@ public class CustomNetworkManager : NetworkManager
         
         }
     }
+
+    void Start()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
     
     
     // CONNECTIONS =================
@@ -80,6 +85,14 @@ public class CustomNetworkManager : NetworkManager
         Debug.Log("<color=#00FF00>[CLIENT] : We have connected.</color>");
     }
 
+
+
+    public override void OnClientSceneChanged()
+    {
+        base.OnClientSceneChanged();
+        Debug.Log("Server finished loading the scene: ");
+        // Place your logic here for when the scene has fully loaded
+    }
     // Called when you disconnect from the server - CLIENT
     public override void OnClientDisconnect()
     {
@@ -171,6 +184,28 @@ public class CustomNetworkManager : NetworkManager
         Notification.showMessage.Invoke("Transport Error: " + exception.Message);
     }
 
+    public override void OnApplicationQuit()
+    {
+        base.OnApplicationQuit();
+        // stop client first
+        // (we want to send the quit packet to the server instead of waiting
+        //  for a timeout)
+        if (NetworkClient.isConnected)
+        {
+            StopClient();
+            //Debug.Log("OnApplicationQuit: stopped client");
+        }
+ 
+        // stop server after stopping client (for proper host mode stopping)
+        if (NetworkServer.active)
+        {
+            StopServer();
+            //Debug.Log("OnApplicationQuit: stopped server");
+        }
+ 
+        // Call ResetStatics to reset statics and singleton
+        ResetStatics();
+    }
 
     // OTHER FUNCTIONS ================
 
@@ -200,6 +235,9 @@ public class CustomNetworkManager : NetworkManager
 
         // Allow for joining.
         SteamLobbies.instance.tryingJoin = false;
+
+        // Save the game.
+        DataPersistanceManager.instance.SaveGame();
         
         // Show cursor
         Cursor.lockState = CursorLockMode.None;
@@ -209,5 +247,22 @@ public class CustomNetworkManager : NetworkManager
         SteamLobbies.instance.startedHosting = false;
         SteamLobbies.instance.CurrentLobbyID = 0;
     }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        
+        // Check what scene it is.
+        if (scene.name == "World")
+        {
+            // Load the data.
+            DataPersistanceManager.instance.LoadGame();
+        } else if (scene.name == "MainMenu")
+        {
+            // Load the data.
+            DataPersistanceManager.instance.LoadGame();
+        }
+    }
+ 
+    
 }
 
