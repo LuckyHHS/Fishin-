@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -12,15 +13,15 @@ public class PlayerController : NetworkBehaviour
 
     // PUBLICS
     [Header("Objects")]
-    public GameObject CameraHolder;
+
     public Transform Camera;
-    [SerializeField] private GameObject Orientation;
-    [SerializeField] private GameObject CameraPosition;
+
     [SerializeField] private GameObject SlopeCheck;
     [SerializeField] private GameObject GroundCheck;
     [SerializeField] private LayerMask GroundLayer;
     [SerializeField] private PlayerLoader PlayerLoader;
-    [SerializeField] private GameObject PlayerModel;
+
+  
 
     [Header("Movement & Cameras")]
     [SerializeField] private float MovementSpeed = 7f;
@@ -62,7 +63,7 @@ public class PlayerController : NetworkBehaviour
         InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() && isLocalPlayer) {UserData.data.Coins += 0.23f; CoinUIUpdate.updateCoin.Invoke(); rigidbody.AddForce(Vector3.up * JumpForce);}};
     }
 
-
+   
     // Update is called once per frame for physics.
     [Client]
     void FixedUpdate()
@@ -107,38 +108,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [Client]
-    void LateUpdate()
-    {
-        // Check user
-        if (!isLocalPlayer) return;
-
-        // Check if we can use it.
-        if (canUse)
-        {
-            HandleCamera();
-        }
-    }
-
-
-    /// <summary>
-    /// Handles the camera, call in LateUpdate.
-    /// </summary>
-    void HandleCamera()
-    {
-        // Get the mouse inputs and add them to current rotation vector.
-        currentCameraRotation.x -= Input.GetAxisRaw("Mouse Y") * CameraSensitivity;
-        currentCameraRotation.y += Input.GetAxisRaw("Mouse X") * CameraSensitivity;
-        currentCameraRotation.x = Mathf.Clamp(currentCameraRotation.x, -85, 85);
-
-        // Set the camera position to the camera position gameobject.
-        CameraHolder.transform.position = CameraPosition.transform.position;
-        
-        // Orientation object is set to the correct rotation, then the players rotation is set to it to prevent player model stuttering, but when setting the camera rotation it doesn't work.
-        Orientation.transform.rotation = Quaternion.Euler(0, currentCameraRotation.y, 0);
-        CameraHolder.transform.rotation = Quaternion.Euler(currentCameraRotation.x, currentCameraRotation.y, 0);
-        PlayerModel.transform.rotation = Quaternion.Euler(0, currentCameraRotation.y, 0);
-    }
+ 
 
     /// <summary>
     /// Handles the movement, call in Update.
@@ -153,8 +123,17 @@ public class PlayerController : NetworkBehaviour
         float Vertical = stickDirection.y * Time.deltaTime;
         float movementForce = MovementSpeed;
 
+        // Determine the forward and right directions based on the camera's orientation
+        Vector3 forwardDirection = Camera.transform.forward; // Get camera's forward direction
+        forwardDirection.y = 0; // Prevent upward movement
+        forwardDirection.Normalize(); // Normalize to ensure consistent speed
+
+        Vector3 rightDirection = Camera.transform.right; // Get camera's right direction
+        rightDirection.y = 0; // Prevent upward movement
+        rightDirection.Normalize(); // Normalize to ensure consistent speed
+
         // Set move directions.
-        MoveDirection = ((Orientation.transform.forward * Vertical + Orientation.transform.right * Horizontal).normalized) * movementForce * (OnSlope() ? SlopeMultiplier : 1f);
+        MoveDirection = ((forwardDirection * Vertical + rightDirection * Horizontal).normalized) * movementForce * (OnSlope() ? SlopeMultiplier : 1f);
         SlopeMoveDirection = Vector3.ProjectOnPlane(MoveDirection, SlopeHit.normal);
 
         // Check if we are grounded.
@@ -169,6 +148,13 @@ public class PlayerController : NetworkBehaviour
             {
                 rigidbody.AddForce(movementForce * MoveDirection, ForceMode.Force);
             }
+        }
+
+        if (stickDirection.magnitude > 0.1f)
+        {
+             // Calculate the target rotation based on movement direction
+            Quaternion targetRotation = Quaternion.LookRotation(MoveDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * CameraSensitivity);
         }
 
         // Get flat vel.

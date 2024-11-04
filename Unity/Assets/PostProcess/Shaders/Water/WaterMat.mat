@@ -52,7 +52,7 @@ Material:
     - _Slimness: 1
     - _Smoothness: 0.1
     - _StepAmount: 0.7
-    - _WaveHeight: 0.05
+    - _WaveHeight: 0.02
     - _WaveSpeed: 0.03
     m_Colors:
     - _BaseColor: {r: 0.23113209, g: 0.68340737, b: 1, a: 1}
