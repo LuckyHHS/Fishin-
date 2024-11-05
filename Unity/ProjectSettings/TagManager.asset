@@ -6,6 +6,8 @@ TagManager:
   tags:
   - World
   - Water
+  - Ground
+  - Walls
   layers:
   - Default
   - TransparentFX

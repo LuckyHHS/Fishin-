@@ -27,6 +27,8 @@ public class CustomNetworkManager : NetworkManager
     [SerializeField] private GameObject PlayerPrefab;
     [SerializeField] private Vector3[] SpawnPoints;
     [SerializeField] private GameObject LoadingScreenPrefab;
+    [SerializeField] private GameObject[] Handlers;
+    [SerializeField] private GameObject[] PlayerHandlers;
 
     public static CustomNetworkManager instance;
     public bool gracefulDisconnect = false;
@@ -67,6 +69,13 @@ public class CustomNetworkManager : NetworkManager
         // Server initialization.
         NetworkServer.RegisterHandler<CreateCharacterMessage>(OnCreateCharacter);
         Debug.Log("<color=#FF0000>[SERVER] : Server started</color>");
+
+        foreach (GameObject handler in Handlers)
+        {
+            GameObject handle = Instantiate(handler);
+            NetworkServer.Spawn(handle);
+            Debug.Log("<color=#FF0000>[SERVER]: Server loaded handler " + handler.name + "</color>");
+        }
     }
 
     // Called when a new client connects. - CLIENT
@@ -128,6 +137,13 @@ public class CustomNetworkManager : NetworkManager
     {
         base.OnServerConnect(conn);
         Debug.Log("<color=#FF0000>[SERVER] : Player has joined.</color>");
+
+        //! ADDED THIS CODE.
+        foreach (GameObject hand in PlayerHandlers)
+        {
+            GameObject handle = Instantiate(hand);
+            NetworkServer.Spawn(handle, conn);
+        }
     }
 
     // Called on the server when the server is stopped.

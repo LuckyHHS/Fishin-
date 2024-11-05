@@ -7297,6 +7297,7 @@ MonoBehaviour:
   - {fileID: 7337100960376661191, guid: 9a07d9ae891e84e4fa5cc9beefdf6ff3, type: 3}
   - {fileID: 3874655533337792257, guid: d30a27a38964eba48867b4e150ae8252, type: 3}
   - {fileID: 8700123632755182010, guid: 82b9e05f6a7e1e642a3d94f80100cfae, type: 3}
+  - {fileID: 3685351475440609671, guid: da8362a416f9c7a48a1b2f6c7e41ea1b, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2
@@ -7318,6 +7319,10 @@ MonoBehaviour:
   - {x: -2.209, y: 0.511, z: -4.873}
   LoadingScreenPrefab: {fileID: 3837789880223760905, guid: 6d29b66d6070ac6459cf03175a02b083,
     type: 3}
+  Handlers:
+  - {fileID: 3685351475440609671, guid: da8362a416f9c7a48a1b2f6c7e41ea1b, type: 3}
+  PlayerHandlers:
+  - {fileID: 3806272661465753034, guid: b644a8518b53f7d488f9836e2855948d, type: 3}
   gracefulDisconnect: 0
 --- !u!4 &1987912786
 Transform:

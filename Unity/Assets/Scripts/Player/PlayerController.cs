@@ -19,7 +19,12 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private GameObject SlopeCheck;
     [SerializeField] private GameObject GroundCheck;
     [SerializeField] private LayerMask GroundLayer;
+    [SerializeField] private GameObject ToolHolder;
     [SerializeField] private PlayerLoader PlayerLoader;
+    [SerializeField] private float MaxZoom = 60;
+    [SerializeField] private float MinZoom = 20;
+    [SerializeField] private float ZoomSpeed = 1f;
+    [SerializeField] private CinemachineFreeLook CameraController;
 
   
 
@@ -56,20 +61,48 @@ public class PlayerController : NetworkBehaviour
         
         // Set up the rigidbody and remove the cursor.
         rigidbody = GetComponent<Rigidbody>();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+
+        ToolHandler.instance.toolHolder = ToolHolder;
+        ToolHandler.instance.playerObject = this.gameObject;
 
         // Jumping
         InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() && isLocalPlayer) {UserData.data.Coins += 0.23f; CoinUIUpdate.updateCoin.Invoke(); rigidbody.AddForce(Vector3.up * JumpForce);}};
     }
 
-   
+ 
+    
+    [Client]
+    void Update()
+    {
+        if (!isLocalPlayer) return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ToolHandler.instance.EquipItem(1);
+        } else if ((Input.GetKeyDown(KeyCode.Alpha2)))
+        {
+            ToolHandler.instance.EquipItem(2);
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+
+            // Adjust
+            CameraController.m_Lens.FieldOfView -= scrollInput * ZoomSpeed;
+
+            // Max
+            CameraController.m_Lens.FieldOfView = Mathf.Clamp(CameraController.m_Lens.FieldOfView, MinZoom, MaxZoom);
+        }
+    }
     // Update is called once per frame for physics.
     [Client]
     void FixedUpdate()
     {
         // Check user
         if (!isLocalPlayer) return;
+
+        
 
         if (Input.GetKey(KeyCode.Escape))
         {
@@ -106,6 +139,7 @@ public class PlayerController : NetworkBehaviour
             // Call main method.
             HandleMovement(); 
         }
+        
     }
 
  
