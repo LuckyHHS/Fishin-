@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Mirror;
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class ToolHandler : NetworkBehaviour
+public class ToolHandler : MonoBehaviour
 {
     //* This just holds the current tool you are using and equip and unequip.
 
@@ -19,7 +19,7 @@ public class ToolHandler : NetworkBehaviour
     public static ToolHandler instance { get; set; }
     public GameObject playerObject;
     public GameObject toolHolder;
-    
+    public List<GameObject> spawnedObjects;
 
     void Awake()
     {
@@ -34,65 +34,104 @@ public class ToolHandler : NetworkBehaviour
     }
 
 
-    [Client]
+  
     public void Unequip()
     {
         if (tool == null) { return;}
-        Debug.Log("Unequipping");
 
         // Call the server to destroy the tool.
-        ServerToolHandler.instance.DestroyTool(toolGameobject);
+        DestroyTool();
 
         // Reset properties
         tool = null;
         currentToolId = 0;
     }
 
-    [Client]
+ 
     public void Equip(int key)
     {
-        
         if (tool != null) { return;}
-        Debug.Log("Equipping " + (isClient ? "client" : "what"));
 
         // Call the server to spawn in the tool.
-        ServerToolHandler.instance.SpawnTool(inventory[key - 1], toolHolder);
+        SpawnTool(key);
 
         // Set the properties
         currentToolId = key;
     }
 
-    [Client]
-    public void UpdateData(GameObject targetTool)
-    {
-        // Set up properties.
-        toolGameobject = targetTool;
-        tool = targetTool.GetComponent<Tool>();
 
-        Debug.Log("Updated data.");
-    }
 
-    [Client]
+  
     public void EquipItem(int key)
     {
-        //! THIS IS ALWAYS FALSE, AND THE CODE IS RUNNIONG AS CLIENT?
-         if (!isLocalPlayer) {Debug.Log("Not local player"); return;};
+
+
+        // Check if intenory item exits.
+        if (key > inventory.Length || key < 0) { return; }
 
         // Listen for keycodes, and check if there an tool in that slot.
         if (inventory[key - 1] != null)
         {
             // If there is a tool currently, unequip it.
-            if (tool != null && currentToolId != key)
+            if (tool != null)
             {
-                Unequip();
-            }
+                if (key == currentToolId) {
+                    // Unequip it.
+                    Unequip();
+                    return;
+                }
 
-            // Equip item 1.
-            Equip(key);
-        }
-        else
-        {
-            Debug.Log("No item in that slot.");
+                // Unequip it.
+                Unequip();
+
+                // Equip item 1.
+                Equip(key);
+            }
+            else
+            {
+                // Equip item 1.
+                Equip(key);
+            }   
         }
     }
+
+ 
+
+   
+    public void SpawnTool(int key)
+    {
+        GameObject toolGameObject =inventory[key - 1];
+
+        // Spawn the tool.
+        GameObject tooled = Instantiate(toolGameObject, toolHolder.transform);
+
+        // Set properties.
+        tooled.transform.localPosition = Vector3.zero;
+        tooled.transform.localRotation = Quaternion.identity;
+        
+
+        // Notify client
+        toolGameobject = tooled;
+        tool = toolGameobject.GetComponent<Tool>();       
+    }
+
+  
+    public void DestroyTool()
+    {
+
+        // First remove all spawned objects.
+        foreach (GameObject networkedObject in spawnedObjects)
+        {
+            if (networkedObject == null) { continue;}
+            Destroy(networkedObject);
+        }
+
+        // Clear it.
+        spawnedObjects.Clear();
+        
+        // Destroy the tool on the server.
+        Destroy(toolGameobject);
+    }
+
+    
 }

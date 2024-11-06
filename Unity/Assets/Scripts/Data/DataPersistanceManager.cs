@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.Rendering.LookDev;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 public class DataPersistanceManager : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class DataPersistanceManager : MonoBehaviour
     private GameData gameData;
     private List<IDataPersistance> dataPersistanceObjects;
     private FileDataHandler dataHandler;
+    private int currentLoadIndex = 0;
 
     void Awake()
     {
@@ -32,6 +34,8 @@ public class DataPersistanceManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(this.gameObject);
         }
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     private void Start()
@@ -46,9 +50,23 @@ public class DataPersistanceManager : MonoBehaviour
         this.gameData = new GameData();
     }
 
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        currentLoadIndex++;
+        if (currentLoadIndex > 2)
+        {
+            // Load.
+            LoadGame();
+        }
+        
+    }
+
     public void LoadGame()
     {
+        // Get data persists.
         this.dataPersistanceObjects = FindAllDataPersistanceObjects();
+
+        if (dataHandler == null) { dataHandler = new FileDataHandler(Application.persistentDataPath, fileName, useEncryption); }
         // Load any saved data.
         this.gameData = dataHandler.Load();
         

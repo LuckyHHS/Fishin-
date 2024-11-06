@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Mirror;
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,27 +21,30 @@ public class Rod : Tool
 
     public override void UseRod(float power)
     {
-        if (!isLocalPlayer) { return;}
-        CmdThrowBobber(power);
+        ThrowBobber(power);
+        UserData.data.TotalCasts += 1;
     }
+
     void Start()
     {
         toolGameObject = gameObject;
     }
 
-    [Command]
-    public void CmdThrowBobber(float power)
+
+    public void ThrowBobber(float power)
     {
         // Check if there is a bobber.
         if (bobber)
         {
-           
-            NetworkServer.Destroy(bobber);
+            Destroy(bobber);
         }
         if (line)
         {
-            NetworkServer.Destroy(line);
+            Destroy(line);
         }
+
+        // Clear spawned objects.
+        ToolHandler.instance.spawnedObjects.Clear();
 
         // Instantiate the bobber at the start point (rod tip position)
         bobber = Instantiate(bobberPrefab, rodTip.transform.position, Quaternion.identity);
@@ -51,9 +54,9 @@ public class Rod : Tool
         line.GetComponent<FishingLine>().startPoint = cosmeticTip;
         line.GetComponent<FishingLine>().endPoint = bobber;
 
-        // Network spawn    
-        NetworkServer.Spawn(bobber);
-        NetworkServer.Spawn(line);
+        // Add spawned objects.
+        ToolHandler.instance.spawnedObjects.Add(bobber);
+        ToolHandler.instance.spawnedObjects.Add(line);
 
         // Get the Rigidbody component of the instantiated bobber
         Rigidbody bobberRigidbody = bobber.GetComponent<Rigidbody>();

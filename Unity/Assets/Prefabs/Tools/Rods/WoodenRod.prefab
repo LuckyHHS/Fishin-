@@ -373,6 +373,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2690722490470518614}
   - component: {fileID: 1068853619429133005}
+  - component: {fileID: 2786585585477662727}
   m_Layer: 0
   m_Name: WoodenRod
   m_TagString: Untagged
@@ -424,14 +425,31 @@ MonoBehaviour:
   syncInterval: 0
   toolName: WoodenRod
   toolType: 0
+  toolGameObject: {fileID: 0}
   bobberPrefab: {fileID: 7337100960376661191, guid: 9a07d9ae891e84e4fa5cc9beefdf6ff3,
     type: 3}
   linePrefab: {fileID: 3874655533337792257, guid: d30a27a38964eba48867b4e150ae8252,
     type: 3}
   rodTip: {fileID: 201154974289365593}
   cosmeticTip: {fileID: 5133974103882079656}
-  power: 3
   arcHeight: 0.2
+--- !u!114 &2786585585477662727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2814774304376455221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 2180745464
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &3641203405539018496
 GameObject:
   m_ObjectHideFlags: 0

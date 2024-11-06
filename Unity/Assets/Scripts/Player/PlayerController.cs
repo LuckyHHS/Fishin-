@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
-using Mirror;
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : MonoBehaviour
 {
     //* THIS SCRIPT CONTROLS THE PLAYER MOVEMENT AND LOOKING
 
@@ -20,7 +21,6 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private GameObject GroundCheck;
     [SerializeField] private LayerMask GroundLayer;
     [SerializeField] private GameObject ToolHolder;
-    [SerializeField] private PlayerLoader PlayerLoader;
     [SerializeField] private float MaxZoom = 60;
     [SerializeField] private float MinZoom = 20;
     [SerializeField] private float ZoomSpeed = 1f;
@@ -51,13 +51,8 @@ public class PlayerController : NetworkBehaviour
 
 
     // Start is called before the first frame update
-    [Client]
     void Start()
     {
-        if (!isLocalPlayer) return;
-
-        // Load player objects.
-        PlayerLoader.PlayerLoaded();
         
         // Set up the rigidbody and remove the cursor.
         rigidbody = GetComponent<Rigidbody>();
@@ -66,16 +61,12 @@ public class PlayerController : NetworkBehaviour
         ToolHandler.instance.playerObject = this.gameObject;
 
         // Jumping
-        InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() && isLocalPlayer) {UserData.data.Coins += 0.23f; CoinUIUpdate.updateCoin.Invoke(); rigidbody.AddForce(Vector3.up * JumpForce);}};
+        InputHandler.input.Game.Jump.performed += (InputAction.CallbackContext context)=> {if (context.performed && IsGrounded() ) {UserData.data.Coins += 0.23f; CoinUIUpdate.updateCoin.Invoke(); rigidbody.AddForce(Vector3.up * JumpForce);}};
     }
 
- 
-    
-    [Client]
+
     void Update()
     {
-        if (!isLocalPlayer) return;
-
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ToolHandler.instance.EquipItem(1);
@@ -95,29 +86,15 @@ public class PlayerController : NetworkBehaviour
             CameraController.m_Lens.FieldOfView = Mathf.Clamp(CameraController.m_Lens.FieldOfView, MinZoom, MaxZoom);
         }
     }
+
     // Update is called once per frame for physics.
-    [Client]
     void FixedUpdate()
     {
         // Check user
-        if (!isLocalPlayer) return;
-
-        
-
         if (Input.GetKey(KeyCode.Escape))
         {
-            if (isServer) 
-            {
-                Debug.Log("<color=#00FF00>[CLIENT] : Stopping as host.</color>");
-                CustomNetworkManager.instance.gracefulDisconnect  = true;
-                CustomNetworkManager.instance.StopHost();      
-            }
-            else
-            {
-                Debug.Log("<color=#00FF00>[CLIENT] : Stopping as client.</color>");
-                CustomNetworkManager.instance.gracefulDisconnect  = true;
-                CustomNetworkManager.instance.StopClient();
-            }
+            DataPersistanceManager.instance.SaveGame();
+            SceneManager.LoadScene("MainMenu");
         }
 
         // Check if we can use it.

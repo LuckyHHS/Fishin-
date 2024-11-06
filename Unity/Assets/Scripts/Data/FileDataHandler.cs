@@ -2,10 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Mirror;
 using UnityEngine;
 
-public class FileDataHandler
+public class FileDataHandler : MonoBehaviour
 {
     //* This writes and loads from the files.
 

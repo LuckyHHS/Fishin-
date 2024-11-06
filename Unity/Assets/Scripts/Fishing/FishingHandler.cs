@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Mirror;
+
 using UnityEngine;
 
 using UnityEngine.UI;
@@ -47,7 +47,7 @@ public class FishingHandler : MonoBehaviour
             currentPower = 0;
             source.Play();
         }
-
+       
         // Listen for let go.
         if (startedHolding && Input.GetMouseButtonUp(0))
         {
@@ -58,9 +58,10 @@ public class FishingHandler : MonoBehaviour
             // Use tool
             if (currentPower >= PerfectSoundRange)
             {
-                GlobalClientSounds.PlaySound.Invoke(1f, ToolHandler.instance.tool.toolGameObject.transform.position, 0);
+                GlobalClientSounds.instance.PlaySound.Invoke(1f, ToolHandler.instance.tool.toolGameObject.transform.position, 0);
             }
-            GlobalClientSounds.PlaySound.Invoke(castSoundVolume, ToolHandler.instance.tool.toolGameObject.transform.position, 1);
+            GlobalClientSounds.instance.PlaySound.Invoke(castSoundVolume, ToolHandler.instance.tool.toolGameObject.transform.position, 1);
+         
             ToolHandler.instance.tool.UseRod(currentPower * distanceMultiplier);
         }
 
