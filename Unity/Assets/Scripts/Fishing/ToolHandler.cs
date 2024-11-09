@@ -20,6 +20,7 @@ public class ToolHandler : MonoBehaviour
     public GameObject playerObject;
     public GameObject toolHolder;
     public List<GameObject> spawnedObjects;
+    public FishingHandler handler; 
 
     void Awake()
     {
@@ -45,6 +46,13 @@ public class ToolHandler : MonoBehaviour
         // Reset properties
         tool = null;
         currentToolId = 0;
+
+        // Remove any fishing currently.
+        if (handler.waitingForFish != null)
+        {
+            StopCoroutine(handler.waitingForFish);
+            handler.waitingForFish = null;
+        }
     }
 
  
@@ -64,7 +72,7 @@ public class ToolHandler : MonoBehaviour
   
     public void EquipItem(int key)
     {
-
+        if (handler.reeling || handler.playingReelAnimation) { return; }
 
         // Check if intenory item exits.
         if (key > inventory.Length || key < 0) { return; }

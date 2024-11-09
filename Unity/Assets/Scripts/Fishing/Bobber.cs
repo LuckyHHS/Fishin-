@@ -20,6 +20,7 @@ public class Bobber : MonoBehaviour
             isFloating = true;
             Destroy(GetComponent<Rigidbody>());
             waterSurface = collision.transform; // Assuming the water surface is the parent of the collider
+            GetComponent<AudioSource>().Play();
         }
         else
         {

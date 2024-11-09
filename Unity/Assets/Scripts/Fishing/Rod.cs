@@ -9,20 +9,36 @@ public class Rod : Tool
     //* This is the class for a rod.
 
     // PUBLICS
+    [Header("Objects")]
     [SerializeField] GameObject bobberPrefab;
     [SerializeField] GameObject linePrefab;
     [SerializeField] GameObject rodTip;
     [SerializeField] GameObject cosmeticTip;
+    [SerializeField] Animator animator;
+    
+    
+    [Header("Settings")]
+    public float reelTime = 4f;
     [SerializeField] float arcHeight = 5f;
 
     // PRIVATES
-    private GameObject bobber;
+    public GameObject bobber;
     private GameObject line;
+    private float power = 0;
+    private bool casting = false;
 
-    public override void UseRod(float power)
+    public override void UseRod(float wantedPower)
     {
-        ThrowBobber(power);
-        UserData.data.TotalCasts += 1;
+        if (casting) return;
+        casting = true;
+        // Set throw cast.
+        animator.SetTrigger("Throw");
+        power = wantedPower;
+        if (UserData.data != null)
+        {
+            UserData.data.TotalCasts += 1;
+        }
+        
     }
 
     void Start()
@@ -30,9 +46,22 @@ public class Rod : Tool
         toolGameObject = gameObject;
     }
 
-
-    public void ThrowBobber(float power)
+  
+    public void DestroyBobberLine()
     {
+        if (bobber)
+        {
+            Destroy(bobber);
+        }
+        if (line)
+        {
+            Destroy(line);
+        }
+    }
+    public void ThrowBobber()
+    {
+        casting = false;
+        
         // Check if there is a bobber.
         if (bobber)
         {

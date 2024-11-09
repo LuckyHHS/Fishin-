@@ -19,7 +19,7 @@ public class Tool : MonoBehaviour
 
     public virtual void UseRod(float power)
     { 
-   
+        
     }
 
     public virtual void Use()
